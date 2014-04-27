@@ -16,6 +16,8 @@
 #define IOB_GREEN_ON 	PORTD |= _BV(PD6);
 #define IOB_GREEN_OFF 	PORTD &= ~_BV(PD6);
 
+#include <stdint.h>
+
 void iob_init();
 
 void iob_wheel_isr();

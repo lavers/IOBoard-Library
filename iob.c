@@ -86,10 +86,10 @@ uint8_t iob_read(uint8_t button)
 {
 	switch(button)
 	{
-		case IO_ANY:
+		case IOB_ANY:
 			return iob_state;
 
-		case IO_DIRECTION:
+		case IOB_DIRECTION:
 			return iob_state > 1;
 
 		default:
@@ -132,11 +132,11 @@ void iob_button_isr()
 
 	if(PIND & _BV(PD1))
 	{
-		iob_state &= ~_BV(IO_CENTER);
+		iob_state &= ~_BV(IOB_CENTER);
 	}
 	else
 	{
-		iob_state |= _BV(IO_CENTER);
+		iob_state |= _BV(IOB_CENTER);
 	}
 
 	// Restore port c
