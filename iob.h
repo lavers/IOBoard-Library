@@ -18,8 +18,10 @@
 
 #include <stdint.h>
 
-void iob_init();
+typedef enum {IOB_NORTH = 1, IOB_EAST = 0, IOB_SOUTH = -1, IOB_WEST = 2} iob_orientation;
 
+void iob_init();
+void iob_set_orientation(iob_orientation orientation);
 void iob_wheel_isr();
 void iob_button_isr();
 
@@ -32,4 +34,3 @@ void iob_wait_for_button(uint8_t button);
 
 void iob_setup_wheel_timer();
 void iob_setup_button_timer();
-
