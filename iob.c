@@ -10,11 +10,12 @@
 
 volatile uint8_t iob_state;
 volatile int16_t iob_delta;
+iob_orientation button_orientation;
 
 void iob_init()
 {
 	iob_state = 0;
-
+	button_orientation = IOB_EAST;
 	// Disable JTAG
 
 	MCUCR |= _BV(JTD);
@@ -29,6 +30,11 @@ void iob_init()
 
 	DDRD &= ~(_BV(PD0) | _BV(PD1));
 	PORTD |= _BV(PD0) | _BV(PD1);
+}
+
+void iob_set_orientation(iob_orientation orientation)
+{
+    button_orientation = orientation;
 }
 
 void iob_setup_wheel_timer()
@@ -50,10 +56,28 @@ void iob_setup_button_timer()
 
 	TIMSK2 |= _BV(OCIE2A);
 }
+int8_t max(int8_t val1, int8_t val2)
+{
+    if(val1 > val2) return val1;
+    return val2;
+}
+
+uint8_t orient(uint8_t state)
+{
+    if(state == 0) return 0;
+    uint8_t centre = state & _BV(IOB_CENTER);
+    state = state >> 1;
+
+    uint8_t lower = state & (_BV(max(-(int8_t)button_orientation, 0)) - 1);
+	uint8_t newState = (button_orientation < 0) ? (state >> -button_orientation) : (state << button_orientation);
+    uint8_t upper = newState & ((_BV(max(button_orientation, 0)) - 1) << 4);
+
+	return (((newState & 0xF) | (lower << 3) | (upper >> 4)) << 1) | centre;
+}
 
 uint8_t iob_get_state()
 {
-	return iob_state;
+	return orient(iob_state);
 }
 
 int16_t iob_get_delta()
@@ -87,13 +111,13 @@ uint8_t iob_read(uint8_t button)
 	switch(button)
 	{
 		case IOB_ANY:
-			return iob_state;
+			return orient(iob_state);
 
 		case IOB_DIRECTION:
 			return iob_state > 1;
 
 		default:
-			return (iob_state >> button) & 1;
+			return (orient(iob_state) >> button) & 1;
 	}
 }
 
